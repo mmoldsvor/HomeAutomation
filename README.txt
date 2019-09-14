@@ -1,5 +1,5 @@
 --- USE SENSOR DATA --
-'POST /sensorData'
+'POST /DT/touchEvent'
 
 ## RESPONSE ##
 - '200 OK' if successful

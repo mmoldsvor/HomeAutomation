@@ -1,0 +1,37 @@
+from devices import TelldusSocket
+from sensors import DisruptiveTouch
+
+
+class Handler:
+    def __init__(self):
+        self.data = self.request_data()
+
+    def request_data(self):
+        raise NotImplemented
+
+    def get_by_identifier(self, identifier):
+        identifiers = [item.identifier for item in self.data]
+        if identifier in identifiers:
+            return self.data[identifiers.index(identifier)]
+        return None
+
+
+class SensorHandler(Handler):
+    def __init__(self, device_handler):
+        self.device_handler = device_handler
+        super().__init__()
+
+    def request_data(self):
+        print(self.device_handler)
+        return [DisruptiveTouch('projects/blpso805uuabl6lgd3cg/devices/bja0082e27fg00a7fing', 'Stue Vest',
+                                [self.device_handler.get_by_identifier('5049830')]),
+                DisruptiveTouch('projects/blpso805uuabl6lgd3cg/devices/bja00677cdlg00ba0epg', 'Stue Øst',
+                                [self.device_handler.get_by_identifier('5049830')]),
+                DisruptiveTouch('projects/blpso805uuabl6lgd3cg/devices/bja0abj1or1g00e49m7g', 'Lampe',
+                                [self.device_handler.get_by_identifier('5049845')])]
+
+
+class DeviceHandler(Handler):
+    def request_data(self):
+        return [TelldusSocket('5049830', 'Stue Lys', 0),
+                TelldusSocket('5049845', 'Test', 0)]
