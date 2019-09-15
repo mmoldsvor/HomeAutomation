@@ -1,3 +1,6 @@
+REST API
+===
+
 **List Devices**
 ----
   Returns json data for every device in the network
@@ -8,8 +11,10 @@
 
 ### Success Response:
 
-  * **Code:** 200 <br />
-    **Content:** `{
+**Code:** 200 OK <br />
+**Content:** 
+    ```json
+    {
         "devices": [
             {
                 "<device_identifier>": {
@@ -22,11 +27,12 @@
                 }
             }
         ]
-    }`
+    }
+    ```
  
 ### Error Response:
-  * **Code:** 401 UNAUTHORIZED <br />
-    **Content:** `{ error : "You are unauthorized to make this request." }`
+  **Code:** 401 UNAUTHORIZED <br />
+  **Content:** `{ error : "You are unauthorized to make this request." }`
     
     
 **List Sensors**
