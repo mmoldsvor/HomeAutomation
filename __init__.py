@@ -22,3 +22,4 @@ if __name__ == '__main__':
     flask_app.telldus_interface = telldus_interface
 
     flask_app.app.run(host='0.0.0.0')
+

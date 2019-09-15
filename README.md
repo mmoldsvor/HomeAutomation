@@ -1,9 +1,11 @@
 REST API
 ===
+Devices
+===
 
 **List Devices**
 ----
-  Returns json data for every device in the network
+Returns json data for every device in the network
 
 ### Request
 
@@ -15,31 +17,27 @@ REST API
   
 ```json
 {
-  "devices": [
-    {
-      "<device_identifier>": {
-        "device_name": "Stue Lys"
-      }
-    },
-    {
-      "<device_identifier>": {
-        "device_name": "Test"
-      }
+    "devices": {
+        "<identifier>": {
+            "device_name": "Device 1"
+        },
+        "<identifier>": {
+            "device_name": "Device 2"
+        }
     }
-  ]
 }
 ``` 
 
 **Get Device By Identifier**
 ----
-  Returns json data for the specified device in the network
+Returns json data for the specified device in the network
   
-### Required Parameters
-  - identifier:  
-
 ### Request
 
   `GET /device/<identifier>`
+  
+### Required Parameters
+  - `identifier`: An unique identification string used to identify each device
 
 ### Response
 
@@ -47,9 +45,33 @@ REST API
   `404 NOT FOUND - on device not found`
 ```json
 {
-  "<device_identifier>": {
-    "device_name": "Stue Lys"
-  }
+    "<identifier>": {
+        "device_name": "Device"
+    }
+}
+```
+
+**Add Device**
+----
+Creates a new Device
+  
+### Request
+
+  `POST /device/<identifier>`
+  
+### Required Parameters
+  - `class_name`: The name of the Device Class or Subclass of the added device
+  - `name`: Display name of the added device
+
+### Response
+
+  `200 OK - on success`\
+  `400 BAD REQUEST - on not unique identifier or required parameters not supplied`
+```json
+{
+    "<identifier>": {
+        "device_name": "Device"
+    }
 }
 ```
 
@@ -58,7 +80,7 @@ Sensors
     
 **List Sensors**
 ----
-  Returns json data for every sensor in the network
+Returns json data for every sensor in the network
 
 ### Request
 
@@ -70,45 +92,37 @@ Sensors
   
 ```json
 {
-  "sensors":[
-      {
-        "<sensor_identifier>":{
-          "devices":[
-            {
-              "<device_identifier>":{
-                "device_name":"Stue Lys"
-              }
-            }
-          ],
-        "sensor_name":"Stue Vest"
-      }
-    },
-    {
-      "<sensor_identifer>":{
-        "devices":[
-          {
-            "<device_identifier>":{
-              "device_name":"Stue Lys"
-            }
-          }
-        ],
-        "sensor_name":"Stue Øst"
-      }
+    "sensors": {
+        "<sensor_identifier>": {
+            "devices": {
+                "<device_identifier>": {
+                    "device_name": "Device 1"
+                }
+            },
+            "sensor_name": "Sensor 1"
+        },
+        "<sensor_identifier>": {
+            "devices": {
+                "<device_identifier>": {
+                    "device_name": "Device 2"
+                }
+            },
+            "sensor_name": "Sensor 2"
+        }
     }
-  ]
 }
 ```
 
 **Get Sensor By Identifier**
 ----
-  Returns json data for the specified sensor in the network
+Returns json data for the specified sensor in the network
   
-### Required Parameters
-  - identifier:  
-
 ### Request
 
   `GET /sensor/<identifier>`
+  
+### Required Parameters
+  - `identifier`: An unique identification string used to identify each sensor
 
 ### Response
 
@@ -116,15 +130,66 @@ Sensors
   `404 NOT FOUND - on sensor not found`
 ```json
 {
-  "<sensor_identifier>": {
-    "devices": [
-      {
-        "<device_identifier>": {
-          "device_name": "Stue Lys"
-        }
-      }
-    ],
-    "sensor_name": "Stue Vest"
-  }
+    "<sensor_identifier>": {
+        "devices": {
+            "<device_identifier>": {
+                "device_name": "Device"
+            }
+        },
+        "sensor_name": "Sensor"
+    }
+}
+```
+
+**Add Sensor**
+----
+Creates a new Sensor
+  
+### Request
+
+  `POST /sensor/<identifier>`  
+  
+### Required Parameters
+  - `class_name`: The name of the Sensor Class or Subclass of the added device
+  - `name`: Display name of the added device
+
+### Response
+
+  `200 OK - on success`\
+  `400 BAD REQUEST - on not unique identifier or required parameters not supplied`
+```json
+{
+    "<identifier>": {
+        "devices": {},
+        "sensor_name": "Sensor"
+    }
+}
+```
+
+**Pair Sensor with Device**
+----
+Creates connection between Sensor and Device
+  
+### Request
+
+  `POST /pair/<sensor_identifier>/<device_identifier>`  
+  
+### Response
+
+  `200 OK - on success`\
+  `404 NOT FOUND - on either the sensor or the device not being found`
+```json
+{
+    "<sensor_identifier>": {
+        "devices": {
+            "<device_identifier>": {
+                "device_name": "Device 1"
+            },
+            "<device_identifier>": {
+                "device_name": "Device 2"
+            }
+        },
+        "sensor_name": "Sensor"
+    }
 }
 ```

@@ -24,7 +24,7 @@ class Device:
 
 
 class TelldusSocket(Device):
-    def __init__(self, identifier, name, state):
+    def __init__(self, identifier, name, state=False):
         """
         :param state: bool - The state of the outlet, on or off
         """
@@ -47,7 +47,7 @@ class TelldusSocket(Device):
 
 
 class TelldusDimmer(Device):
-    def __init__(self, identifier, name, value, direction):
+    def __init__(self, identifier, name, value=0, direction=0):
         """
         :param value: int - A value between 0 and 255
         :param direction: int - 0: Next action will value to 255
@@ -71,6 +71,4 @@ class TelldusDimmer(Device):
         elif self.direction == 3:
             self.value = 0
             func('device/dim', f'id={self.identifier}&level={self.value}')
-        self.direction = self.direction + 1 if self.direction <= 3 else 0
-
-
+        self.direction = self.direction + 3 if self.direction < 3 else 0
