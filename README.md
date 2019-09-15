@@ -9,11 +9,13 @@ REST API
 
   `GET /devices/list`
 
-### Success Response:
+### Response
 
-**Code:** 200 OK <br />
-**Content:** 
-    ```json
+  `200 OK - on success`\
+  `401 UNAUTHORIZED - on failed authorization`
+
+  
+  ```json
     {
         "devices": [
             {
@@ -28,66 +30,49 @@ REST API
             }
         ]
     }
-    ```
- 
-### Error Response:
-  **Code:** 401 UNAUTHORIZED <br />
-  **Content:** `{ error : "You are unauthorized to make this request." }`
-    
+```    
     
 **List Sensors**
 ----
   Returns json data for every sensor in the network
 
-* **URL**
+### Request
 
-  /sensors/list
+  `GET /sensors/list`
 
-* **Method:**
+### Response
 
-  `GET`
+  `200 OK - on success`\
+  `401 UNAUTHORIZED - on failed authorization`
+
   
-*  **URL Params**
-
-  None
-
-* **Data Params**
-
-  None
-
-* **Success Response:**
-
-  * **Code:** 200 <br />
-    **Content:** `
+  ```json
     {
-        "sensors": [
-            {
-                "<sensor_identifier>": {
-                    "devices": [
-                        {
-                            "<device_identifier>": {
-                                "device_name": "Stue Lys"
-                            }
-                        }
-                    ],
-                    "sensor_name": "Stue Vest"
-                }
-            },
-            {
-                "<sensor_identifer>": {
-                    "devices": [
-                        {
-                            "<device_identifier>": {
-                                "device_name": "Stue Lys"
-                            }
-                        }
-                    ],
-                    "sensor_name": "Stue Øst"
-                }
-            }
-        ]
-    }`
- 
-* **Error Response:**
-  * **Code:** 401 UNAUTHORIZED <br />
-    **Content:** `{ error : "You are unauthorized to make this request." }`
+       "sensors":[
+          {
+             "<sensor_identifier>":{
+                "devices":[
+                   {
+                      "<device_identifier>":{
+                         "device_name":"Stue Lys"
+                      }
+                   }
+                ],
+                "sensor_name":"Stue Vest"
+             }
+          },
+          {
+             "<sensor_identifer>":{
+                "devices":[
+                   {
+                      "<device_identifier>":{
+                         "device_name":"Stue Lys"
+                      }
+                   }
+                ],
+                "sensor_name":"Stue Øst"
+             }
+          }
+       ]
+    }
+```    
