@@ -32,7 +32,9 @@ def sensor_data():
         event = json_data['event']
 
         if event['eventType'] == 'touch':
-            sensor = sensor_handler.get_by_identifier(event['targetName'])
+            # Extract only the name of the sensor
+            sensor_name = event['targetName'].split('/')[-1]
+            sensor = sensor_handler.get_by_identifier(sensor_name)
             if sensor is not None:
                 sensor.on_event(telldus_interface.request_action)
 
@@ -77,8 +79,9 @@ def list_sensors():
     return jsonify({'sensors': [sensor.info_dict() for sensor in sensor_handler.data]})
 
 
-@app.route('/sensor/<identifier>', methods=['GET, POST'])
+@app.route('/sensor/<identifier>', methods=['GET', 'POST'])
 def get_sensor(identifier):
+    print(identifier)
     if request.method == 'GET':
         sensor = sensor_handler.get_by_identifier(identifier)
         if sensor is not None:

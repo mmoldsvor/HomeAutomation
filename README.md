@@ -11,26 +11,50 @@ REST API
 
 ### Response
 
-  `200 OK - on success`\
-  `401 UNAUTHORIZED - on failed authorization`
-
+  `200 OK - on success`
   
-  ```json
+```json
+{
+  "devices": [
     {
-        "devices": [
-            {
-                "<device_identifier>": {
-                    "device_name": "Stue Lys"
-                }
-            },
-            {
-                "<device_identifier>": {
-                    "device_name": "Test"
-                }
-            }
-        ]
+      "<device_identifier>": {
+        "device_name": "Stue Lys"
+      }
+    },
+    {
+      "<device_identifier>": {
+        "device_name": "Test"
+      }
     }
-```    
+  ]
+}
+``` 
+
+**Get Device By Identifier**
+----
+  Returns json data for the specified device in the network
+  
+### Required Parameters
+  - identifier:  
+
+### Request
+
+  `GET /device/<identifier>`
+
+### Response
+
+  `200 OK - on success`\
+  `404 NOT FOUND - on device not found`
+```json
+{
+  "<device_identifier>": {
+    "device_name": "Stue Lys"
+  }
+}
+```
+
+Sensors
+===   
     
 **List Sensors**
 ----
@@ -42,37 +66,65 @@ REST API
 
 ### Response
 
-  `200 OK - on success`\
-  `401 UNAUTHORIZED - on failed authorization`
-
+  `200 OK - on success`
   
-  ```json
+```json
+{
+  "sensors":[
+      {
+        "<sensor_identifier>":{
+          "devices":[
+            {
+              "<device_identifier>":{
+                "device_name":"Stue Lys"
+              }
+            }
+          ],
+        "sensor_name":"Stue Vest"
+      }
+    },
     {
-       "sensors":[
+      "<sensor_identifer>":{
+        "devices":[
           {
-             "<sensor_identifier>":{
-                "devices":[
-                   {
-                      "<device_identifier>":{
-                         "device_name":"Stue Lys"
-                      }
-                   }
-                ],
-                "sensor_name":"Stue Vest"
-             }
-          },
-          {
-             "<sensor_identifer>":{
-                "devices":[
-                   {
-                      "<device_identifier>":{
-                         "device_name":"Stue Lys"
-                      }
-                   }
-                ],
-                "sensor_name":"Stue Øst"
-             }
+            "<device_identifier>":{
+              "device_name":"Stue Lys"
+            }
           }
-       ]
+        ],
+        "sensor_name":"Stue Øst"
+      }
     }
-```    
+  ]
+}
+```
+
+**Get Sensor By Identifier**
+----
+  Returns json data for the specified sensor in the network
+  
+### Required Parameters
+  - identifier:  
+
+### Request
+
+  `GET /sensor/<identifier>`
+
+### Response
+
+  `200 OK - on success`\
+  `404 NOT FOUND - on sensor not found`
+```json
+{
+  "<sensor_identifier>": {
+    "devices": [
+      {
+        "<device_identifier>": {
+          "device_name": "Stue Lys"
+        }
+      }
+    ],
+    "sensor_name": "Stue Vest"
+  }
+}
+```

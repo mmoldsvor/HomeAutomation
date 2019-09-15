@@ -22,11 +22,11 @@ class SensorHandler(Handler):
         super().__init__()
 
     def request_data(self):
-        return [DisruptiveTouch('projects/blpso805uuabl6lgd3cg/devices/bja0082e27fg00a7fing', 'Stue Vest',
+        return [DisruptiveTouch('bja0082e27fg00a7fing', 'Stue Vest',
                                 [self.device_handler.get_by_identifier('5049852')]),
-                DisruptiveTouch('projects/blpso805uuabl6lgd3cg/devices/bja00677cdlg00ba0epg', 'Stue Øst',
+                DisruptiveTouch('bja00677cdlg00ba0epg', 'Stue Øst',
                                 [self.device_handler.get_by_identifier('5049852')]),
-                DisruptiveTouch('projects/blpso805uuabl6lgd3cg/devices/bja0abj1or1g00e49m7g', 'Lampe',
+                DisruptiveTouch('bja0abj1or1g00e49m7g', 'Lampe',
                                 [self.device_handler.get_by_identifier('5049845')])]
 
 
