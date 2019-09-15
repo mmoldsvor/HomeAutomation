@@ -1,4 +1,4 @@
-from devices import TelldusSocket
+from devices import TelldusSocket, TelldusDimmer
 from sensors import DisruptiveTouch
 
 
@@ -33,5 +33,5 @@ class SensorHandler(Handler):
 
 class DeviceHandler(Handler):
     def request_data(self):
-        return [TelldusSocket('5049830', 'Stue Lys', 0),
-                TelldusSocket('5049845', 'Test', 0)]
+        return [TelldusDimmer('5049852', 'Stue Lys', 0, 0),
+                TelldusSocket('5049845', 'Test', False)]

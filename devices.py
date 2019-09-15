@@ -1,3 +1,5 @@
+import threading
+
 class Device:
     def __init__(self, identifier, name):
         """
@@ -25,6 +27,9 @@ class Device:
 
 class TelldusSocket(Device):
     def __init__(self, identifier, name, state):
+        """
+        :param state: bool - The state of the outlet, on or off
+        """
         super().__init__(identifier, name)
         self.state = state
 
@@ -41,5 +46,33 @@ class TelldusSocket(Device):
 
     def turn_off(self, func):
         func('device/turnOff', f'id={self.identifier}')
+
+
+class TelldusDimmer(Device):
+    def __init__(self, identifier, name, value, direction):
+        """
+        :param value: int - A value between 0 and 255
+        :param direction: int - 0: Next action will value to 255
+                                1: Next action will slowly dim downwards
+                                2: Next action will stop dimming
+                                3: Next action will value to 0
+        """
+        super().__init__(identifier, name)
+        self.value = value
+        self.direction = direction
+
+    def action(self, func):
+        print(self.direction)
+        if self.direction == 0:
+            self.value = 255
+            func('device/dim', f'id={self.identifier}&level={self.value}')
+        elif self.direction == 1:
+            raise NotImplemented
+        elif self.direction == 2:
+            raise NotImplemented
+        elif self.direction == 3:
+            self.value = 0
+            func('device/dim', f'id={self.identifier}&level={self.value}')
+        self.direction = self.direction + 1 if self.direction > 3 else 0
 
 
