@@ -2,23 +2,11 @@
 ----
   Returns json data for every device in the network
 
-* **URL**
+### Request
 
-  /devices/list
+  `GET /devices/list`
 
-* **Method:**
-
-  `GET`
-  
-*  **URL Params**
-
-  None
-
-* **Data Params**
-
-  None
-
-* **Success Response:**
+### Success Response:
 
   * **Code:** 200 <br />
     **Content:** `{
@@ -36,7 +24,7 @@
         ]
     }`
  
-* **Error Response:**
+### Error Response:
   * **Code:** 401 UNAUTHORIZED <br />
     **Content:** `{ error : "You are unauthorized to make this request." }`
     
