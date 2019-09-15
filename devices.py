@@ -1,5 +1,3 @@
-import threading
-
 class Device:
     def __init__(self, identifier, name):
         """
@@ -22,7 +20,7 @@ class Device:
         Creates a json-friendly representation of the device
         :return:
         """
-        return {self.identifier: {'name': self.name}}
+        return {self.identifier: {'device_name': self.name}}
 
 
 class TelldusSocket(Device):
@@ -73,6 +71,6 @@ class TelldusDimmer(Device):
         elif self.direction == 3:
             self.value = 0
             func('device/dim', f'id={self.identifier}&level={self.value}')
-        self.direction = self.direction + 1 if self.direction > 3 else 0
+        self.direction = self.direction + 1 if self.direction <= 3 else 0
 
 

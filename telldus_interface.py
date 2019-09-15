@@ -75,7 +75,9 @@ class TelldusInterface:
         :return: Response from the server
         """
 
+        print(f'{self.base_url}/json/{request}?{data}')
         response = self.oauth.post(url=f'{self.base_url}/json/{request}', data=data)
+        print(response.json())
         return response.json()
 
     # Unused tue do bug in telldus oauth handling

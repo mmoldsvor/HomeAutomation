@@ -12,7 +12,7 @@ class Sensor:
         Creates a json-friendly representation of the device
         :return:
         """
-        return {self.identifier: {'name': self.name, 'devices': {device.identifier: device.name for device in self.connections}}}
+        return {self.identifier: {'sensor_name': self.name, 'devices': [device.info_dict() for device in self.connections if device is not None]}}
 
 
 class DisruptiveTouch(Sensor):
