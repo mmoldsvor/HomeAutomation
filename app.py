@@ -3,6 +3,7 @@ from flask_basicauth import BasicAuth
 
 import configparser
 import json
+import pickle
 
 device_handler = None
 sensor_handler = None
@@ -51,8 +52,8 @@ def list_devices():
                                 for (key, value) in device.info_dict().items()}})
 
 
-@app.route('/device/<identifier>', methods=['GET', 'POST'])
-def request_device(identifier):
+@app.route('/device/<identifier>', methods=['GET', 'POST', 'DELETE'])
+def get_device(identifier):
     """
     Returns all information regarding the specified device
     :param identifier: The identifier unique to the device
@@ -72,9 +73,20 @@ def request_device(identifier):
         device_info = device_handler.add_data(device_type, identifier, name)
         print(device_info)
         if device_info is not None:
+            save_data()
             return device_info
         else:
             return response(('result', 'Not unique identifier, or missing parameters'), status_code=400)
+
+    elif request.method == 'DELETE':
+        for sensor in sensor_handler.data:
+            sensor.remove_connection(identifier)
+        device_info = device_handler.remove_by_identifier(identifier)
+        if device_info is not None:
+            save_data()
+            return device_info
+        else:
+            abort(404)
 
 
 @app.route('/sensors/list', methods=['GET'])
@@ -87,7 +99,7 @@ def list_sensors():
                                 for (key, value) in sensor.info_dict().items()}})
 
 
-@app.route('/sensor/<identifier>', methods=['GET', 'POST'])
+@app.route('/sensor/<identifier>', methods=['GET', 'POST', 'DELETE'])
 def request_sensor(identifier):
     if request.method == 'GET':
         sensor = sensor_handler.get_by_identifier(identifier)
@@ -101,9 +113,18 @@ def request_sensor(identifier):
         name = request.args.get('name')
         sensor_info = sensor_handler.add_data(sensor_type, identifier, name, [])
         if sensor_info is not None:
+            save_data()
             return sensor_info
         else:
             return response(('result', 'Not unique identifier, or missing parameters'), status_code=400)
+
+    elif request.method == 'DELETE':
+        sensor_info = sensor_handler.remove_by_identifier(identifier)
+        if sensor_info is not None:
+            save_data()
+            return sensor_info
+        else:
+            abort(404)
 
 
 @app.route('/pair/<sensor_identifier>/<device_identifier>', methods=['POST'])
@@ -133,3 +154,9 @@ def device_request(identifier, function):
 
 def response(*args, status_code=200):
     return jsonify({key: value for (key, value) in args}), status_code
+
+
+def save_data():
+    with open(r'data.pickle', 'wb') as output_file:
+        pickle.dump(device_handler.data, output_file)
+        pickle.dump(sensor_handler.data, output_file)

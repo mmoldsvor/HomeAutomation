@@ -1,5 +1,12 @@
 class Sensor:
     def __init__(self, identifier, name, connections):
+        """
+        The parent Sensor class
+        Does also work as a generic sensor
+        :param identifier: Unique identification for each sensor
+        :param name: Name of the sensor
+        :param connections: A list of all device identifiers connected to the sensor
+        """
         self.identifier = identifier
         self.name = name
         self.connections = connections
@@ -20,6 +27,17 @@ class Sensor:
         return {self.identifier: {'sensor_name': self.name,
                                   'devices': {key: value for device in self.connections
                                               for (key, value) in device.info_dict().items() if device is not None}}}
+
+    def remove_connection(self, identifier):
+        """
+        Removes element of given identifier
+        :param identifier: The unique identifier in which is being removed
+        :return: Information about the removed device
+        """
+        identifiers = [device.identifier for device in self.connections]
+        if identifier in identifiers:
+            return self.connections.pop(identifiers.index(identifier)).info_dict()
+        return None
 
 
 class DisruptiveTemp(Sensor):

@@ -3,11 +3,9 @@ from sensors import Sensor
 
 
 class Handler:
-    def __init__(self):
-        self.data = self.request_data()
-
-    def request_data(self):
-        raise NotImplemented
+    def __init__(self, data):
+        self.data = data
+        self.classes = []
 
     def get_by_identifier(self, identifier):
         """
@@ -18,6 +16,17 @@ class Handler:
         identifiers = [item.identifier for item in self.data]
         if identifier in identifiers:
             return self.data[identifiers.index(identifier)]
+        return None
+
+    def remove_by_identifier(self, identifier):
+        """
+        Removes an item given an identifier
+        :param identifier: Unique identification of the item in which is being removed
+        :return: Information about the removed device
+        """
+        identifiers = [item.identifier for item in self.data]
+        if identifier in identifiers:
+            return self.data.pop(identifiers.index(identifier)).info_dict()
         return None
 
     def add_data(self, class_name, identifier, name, *args):
@@ -48,30 +57,17 @@ class Handler:
 
 
 class SensorHandler(Handler):
-    def __init__(self, device_handler):
+    def __init__(self, data, device_handler):
         self.device_handler = device_handler
-        super().__init__()
+        super().__init__(data)
 
         # All possible Class/Subclasses added to handler
         self.classes = [cls for cls in Sensor.__subclasses__()] + [Sensor]
 
 
-    def request_data(self):
-        return [Sensor('bja0082e27fg00a7fing', 'Stue Vest',
-                       [self.device_handler.get_by_identifier('5049852')]),
-                Sensor('bja00677cdlg00ba0epg', 'Stue Øst',
-                       [self.device_handler.get_by_identifier('5049852')]),
-                Sensor('bja0abj1or1g00e49m7g', 'Lampe',
-                       [self.device_handler.get_by_identifier('5049845')])]
-
-
 class DeviceHandler(Handler):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, data):
+        super().__init__(data)
 
         # All possible Class/Subclasses added to handler
         self.classes = [cls for cls in Device.__subclasses__()] + [Device]
-
-    def request_data(self):
-        return [TelldusDimmer('5049852', 'Stue Lys', 0, 0),
-                TelldusSocket('5049845', 'Test', False)]
