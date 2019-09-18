@@ -1,21 +1,19 @@
 from flask import Flask, request, jsonify, abort
 from flask_basicauth import BasicAuth
 
-import configparser
 import json
-import pickle
+
 
 device_handler = None
 sensor_handler = None
 telldus_interface = None
+config_handler = None
 
 app = Flask(__name__)
 
-config = configparser.ConfigParser()
-config.read('.config/config.ini')
 
-app.config['BASIC_AUTH_USERNAME'] = config['basic_auth']['username']
-app.config['BASIC_AUTH_PASSWORD'] = config['basic_auth']['password']
+app.config['BASIC_AUTH_USERNAME'] = 'username'  # config['basic_auth']['username']
+app.config['BASIC_AUTH_PASSWORD'] = 'password'  # ['basic_auth']['password']
 app.config['BASIC_AUTH_FORCE'] = True
 
 basic_auth = BasicAuth(app)
@@ -60,6 +58,7 @@ def get_device(identifier):
     :return: 200 OK - The information in a json format, on success
              else 404 NOT FOUND
     """
+
     if request.method == 'GET':
         device = device_handler.get_by_identifier(identifier)
         if device is not None:
@@ -68,23 +67,38 @@ def get_device(identifier):
             abort(404)
 
     elif request.method == 'POST':
-        device_type = request.args.get('class_name')
-        name = request.args.get('name')
+        try:
+            data = json.loads(request.data)
+        except json.JSONDecodeError:
+            return response(('result', 'Data not provided, or invalid input'), status_code=400)
+
+        # Checks if identifier already exists
+        if not device_handler.is_unique(identifier):
+            return response(('result', 'Identifier has to be unique'), status_code=400)
+
+        # Checks if required data is available
+        if 'class_name' not in data:
+            return response(('result', '"class_name" parameter is missing'), status_code=400)
+
+        device_type = data['class_name']
+        name = device_type
+        if 'name' in data:
+            name = data['name']
+
         device_info = device_handler.add_data(device_type, identifier, name)
-        print(device_info)
         if device_info is not None:
-            save_data()
-            return device_info
+            config_handler.save_data(device_handler.data, sensor_handler.data)
+            return jsonify(device_info), 201
         else:
-            return response(('result', 'Not unique identifier, or missing parameters'), status_code=400)
+            return response(('result', '"class_name" provided was not a valid Device class'), status_code=400)
 
     elif request.method == 'DELETE':
         for sensor in sensor_handler.data:
             sensor.remove_connection(identifier)
         device_info = device_handler.remove_by_identifier(identifier)
         if device_info is not None:
-            save_data()
-            return device_info
+            config_handler.save_data(device_handler.data, sensor_handler.data)
+            return jsonify(device_info)
         else:
             abort(404)
 
@@ -109,28 +123,52 @@ def request_sensor(identifier):
             abort(404)
 
     elif request.method == 'POST':
-        sensor_type = request.args.get('class_name')
-        name = request.args.get('name')
+        try:
+            data = json.loads(request.data)
+        except json.JSONDecodeError:
+            return response(('result', 'Data not provided, or invalid input'), status_code=400)
+
+        # Checks if identifier already exists
+        if not sensor_handler.is_unique(identifier):
+            return response(('result', 'Identifier has to be unique'), status_code=400)
+
+        # Checks if required data is available
+        if 'class_name' not in data:
+            return response(('result', '"class_name" parameter is missing'), status_code=400)
+
+        sensor_type = data['class_name']
+        name = sensor_type
+        if 'name' in data:
+            name = data['name']
+
         sensor_info = sensor_handler.add_data(sensor_type, identifier, name, [])
         if sensor_info is not None:
-            save_data()
-            return sensor_info
+            config_handler.save_data(device_handler.data, sensor_handler.data)
+            return jsonify(sensor_info), 201
         else:
-            return response(('result', 'Not unique identifier, or missing parameters'), status_code=400)
+            return response(('result', '"class_name" provided was not a valid Sensor class'), status_code=400)
 
     elif request.method == 'DELETE':
         sensor_info = sensor_handler.remove_by_identifier(identifier)
         if sensor_info is not None:
-            save_data()
-            return sensor_info
+            config_handler.save_data(device_handler.data, sensor_handler.data)
+            return jsonify(sensor_info)
         else:
             abort(404)
 
 
-@app.route('/pair/<sensor_identifier>/<device_identifier>', methods=['POST'])
-def pair_sensor(sensor_identifier, device_identifier):
-    sensor = sensor_handler.get_by_identifier(sensor_identifier)
-    device = device_handler.get_by_identifier(device_identifier)
+@app.route('/sensor/pair/<identifier>', methods=['POST'])
+def pair_sensor(identifier):
+    try:
+        data = json.loads(request.data)
+    except json.JSONDecodeError:
+        return response(('result', 'Data not provided, or invalid input'), status_code=400)
+
+    if 'device' not in data:
+        return response(('result', 'Device identifier not specified'), status_code=400)
+
+    sensor = sensor_handler.get_by_identifier(identifier)
+    device = device_handler.get_by_identifier(data['device'])
 
     if sensor is not None and device is not None:
         sensor.connections.append(device)
@@ -154,9 +192,3 @@ def device_request(identifier, function):
 
 def response(*args, status_code=200):
     return jsonify({key: value for (key, value) in args}), status_code
-
-
-def save_data():
-    with open(r'data.pickle', 'wb') as output_file:
-        pickle.dump(device_handler.data, output_file)
-        pickle.dump(sensor_handler.data, output_file)

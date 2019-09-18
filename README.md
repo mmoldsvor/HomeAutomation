@@ -28,7 +28,7 @@ Returns json data for every device in the network
 }
 ``` 
 
-**Get Device By Identifier**
+**Get Device by Identifier**
 ----
 Returns json data for the specified device in the network
   
@@ -61,11 +61,13 @@ Creates a new Device
   
 ### Required Parameters
   - `class_name`: The name of the Device Class or Subclass of the added device
-  - `name`: Display name of the added device
+
+### Optional Parameters
+  - `name`: The display name of the device, defaults to `class_name` if not specified
 
 ### Response
 
-  `200 OK - on success`\
+  `201 OK - on success`\
   `400 BAD REQUEST - on not unique identifier or required parameters not supplied`
 ```json
 {
@@ -74,6 +76,30 @@ Creates a new Device
     }
 }
 ```
+
+**Remove Device**
+----
+Removes the specified device and returns it's information
+
+### Request
+
+  `Delete /device/<identifier>`
+  
+### Required Parameters
+  - `identifier`: An unique identification string used to identify each device
+
+### Response
+
+  `200 OK - on success`\
+  `404 NOT FOUND - on device not found`
+  
+```json
+{
+    "<identifier>": {
+        "device_name": "Device"
+    }
+}
+``` 
 
 Sensors
 ===   
@@ -151,11 +177,13 @@ Creates a new Sensor
   
 ### Required Parameters
   - `class_name`: The name of the Sensor Class or Subclass of the added device
-  - `name`: Display name of the added device
+
+### Optional Parameters
+  - `name`: The display name of the device, defaults to `class_name` if not specified
 
 ### Response
 
-  `200 OK - on success`\
+  `201 OK - on success`\
   `400 BAD REQUEST - on not unique identifier or required parameters not supplied`
 ```json
 {
@@ -166,13 +194,45 @@ Creates a new Sensor
 }
 ```
 
+**Remove Sensor**
+----
+Removes the specified sensor and returns it's information
+
+### Request
+
+  `Delete /sensor/<identifier>`
+  
+### Required Parameters
+  - `identifier`: An unique identification string used to identify each sensor
+
+### Response
+
+  `200 OK - on success`\
+  `404 NOT FOUND - on sensor not found`
+  
+```json
+{
+    "<sensor_identifier>": {
+        "devices": {
+            "<device_identifier>": {
+                "device_name": "Device"
+            }
+        },
+        "sensor_name": "Sensor"
+    }
+}
+``` 
+
 **Pair Sensor with Device**
 ----
 Creates connection between Sensor and Device
   
 ### Request
 
-  `POST /pair/<sensor_identifier>/<device_identifier>`  
+  `POST /sensor/pair/<sensor_identifier>`  
+  
+### Required Parameters
+  - `device_identifier`: The identifier of the device to be paired
   
 ### Response
 

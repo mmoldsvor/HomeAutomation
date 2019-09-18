@@ -1,11 +1,21 @@
-from devices import Device, TelldusSocket, TelldusDimmer
-from sensors import Sensor
+from home_controller.devices import Device
+from home_controller.sensors import Sensor
 
 
 class Handler:
     def __init__(self, data):
         self.data = data
         self.classes = []
+
+    def is_unique(self, identifier):
+        """
+        Checks whether the identifier is unique or not
+        :param identifier: The identifier in question
+        :return: bool - True if unique, False otherwise
+        """
+        if identifier in [item.identifier for item in self.data]:
+            return False
+        return True
 
     def get_by_identifier(self, identifier):
         """
@@ -38,20 +48,12 @@ class Handler:
         :param args: The rest of the data added to the Sensor
         :return: Information about the newly added data if successful, None otherwise
         """
-
-        # Checks if identifier already exists
-        if identifier in [sensor.identifier for sensor in self.data]:
-            return None
-
         class_names = [cls.__name__ for cls in self.classes]
-
-        print(class_names)
 
         if class_name in class_names:
             data_class = self.classes[class_names.index(class_name)]
 
             self.data.append(data_class(identifier, name, *args))
-            print(self.data[-1])
             return self.data[-1].info_dict()
         return None
 

@@ -60,7 +60,6 @@ class TelldusDimmer(Device):
         self.direction = direction
 
     def action(self, func):
-        print(self.direction)
         if self.direction == 0:
             self.value = 255
             func('device/dim', f'id={self.identifier}&level={self.value}')

@@ -1,5 +1,4 @@
 from requests_oauthlib import OAuth1Session
-import pprint
 
 
 class TelldusInterface:
@@ -55,7 +54,7 @@ class TelldusInterface:
 
         result = response.json()['device']
         for device in result:
-            pprint.pprint(device)
+            print(device)
 
     def load_devices(self):
         """
