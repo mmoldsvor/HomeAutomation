@@ -26,4 +26,4 @@ if __name__ == '__main__':
     flask_app.telldus_interface = telldus_interface
     flask_app.config_handler = config_handler
 
-    flask_app.app.run(host='0.0.0.0', port=80)
+    flask_app.app.run(host='0.0.0.0', port=5000)
