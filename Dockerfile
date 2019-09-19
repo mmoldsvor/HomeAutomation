@@ -1,4 +1,4 @@
-FROM alpine3.7
+FROM python:latest
 COPY . /app
 WORKDIR /app
 COPY requirements.txt ./
