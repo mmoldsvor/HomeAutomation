@@ -19,30 +19,30 @@ if __name__ == '__main__':
 
     device_data, sensor_data = config_handler.load_data()
 
-    dt_requests = DTSensorRequest(project_id=config_handler.config['dt']['project_id'],
-                                  service_account_email=config_handler.config['dt']['service_account_email'],
-                                  service_account_key_id=config_handler.config['dt']['key_id'],
-                                  service_account_key_secret=config_handler.config['dt']['key_secret'])
-    dt_requests.request_access_token()
-    sensor_request = DeviceRequest([dt_requests])
-
-    device_request = DeviceRequest([])
-
-    device_handler = DeviceHandler(device_data, device_request)
-    sensor_handler = SensorHandler(sensor_data, sensor_request, device_handler)
-
     telldus_interface = TelldusInterface(public_key=config_handler.config['telldus']['public_key'],
                                          private_key=config_handler.config['telldus']['private_key'],
                                          token=config_handler.config['telldus']['token'],
                                          token_secret=config_handler.config['telldus']['secret'])
+    interfaces = {
+        'telldus': telldus_interface,
+        'hue': None
+    }
 
-    sensor_handler.discover_sensors()
+    dt_requests = DTSensorRequest(project_id=config_handler.config['dt']['project_id'],
+                                  service_account_email=config_handler.config['dt']['service_account_email'],
+                                  service_account_key_id=config_handler.config['dt']['key_id'],
+                                  service_account_key_secret=config_handler.config['dt']['key_secret'])
+    sensor_request = DeviceRequest([dt_requests])
 
-    import app as flask_app
+    device_request = DeviceRequest([])
 
-    flask_app.device_handler = device_handler
-    flask_app.sensor_handler = sensor_handler
-    flask_app.telldus_interface = telldus_interface
-    flask_app.config_handler = config_handler
+    sensor_handler = SensorHandler(sensor_data, sensor_request)
+    device_handler = DeviceHandler(device_data, device_request, interfaces)
 
-    flask_app.app.run(host='0.0.0.0', port=80)
+    import REST
+
+    REST.device_handler = device_handler
+    REST.sensor_handler = sensor_handler
+    REST.config_handler = config_handler
+
+    REST.app.run(host='0.0.0.0', port=80)

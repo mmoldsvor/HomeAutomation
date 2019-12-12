@@ -20,21 +20,6 @@ class TelldusInterface:
 
         self.oauth = self.generate_temp_session()
 
-        # Unused tue do bug in telldus oauth handling
-        """
-        self.oauth = OAuth1Session(client_key=self.public_key, client_secret=self.private_key)
-
-        self.resource_owner_key, self.resource_owner_secret = self.request_token()
-        self.verifier = self.authorize()
-
-        self.oauth = OAuth1Session(client_key=self.public_key,
-                                   client_secret=self.private_key,
-                                   resource_owner_key=self.resource_owner_key,
-                                   resource_owner_secret=self.resource_owner_secret,
-                                   verifier=self.verifier)
-        self.access_token()
-        """
-
     def generate_temp_session(self):
         """
         Generates a temporary OAuthSession to authenticate requests
@@ -74,35 +59,5 @@ class TelldusInterface:
         :return: Response from the server
         """
 
-        print(f'{self.base_url}/json/{request}?{data}')
         response = self.oauth.post(url=f'{self.base_url}/json/{request}', data=data)
-        print(response.json())
         return response.json()
-
-    # Unused tue do bug in telldus oauth handling
-    def request_token(self):
-        fetch_response = self.oauth.fetch_request_token(f'{self.base_url}/oauth/requestToken')
-
-        return fetch_response.get('oauth_token'), fetch_response.get('oauth_token_secret')
-
-    def authorize(self):
-        authorization_url = self.oauth.authorization_url(f'{self.base_url}/oauth/authorize')
-        print(f'Please go to URL and authorize: {authorization_url}')
-        redirect_response = input('Paste full redirect URL here: ')
-        oauth_response = self.oauth.parse_authorization_response(redirect_response)
-
-        return oauth_response.get('oauthRand')
-
-    def access_token(self):
-        self.oauth.fetch_access_token(f'{self.base_url}/oauth/accessToken', self.verifier)
-        oauth_tokens = self.oauth.fetch_access_token(f'{self.base_url}/oauth/accessToken')
-
-        self.resource_owner_key = oauth_tokens.get('oauth_token')
-        self.resource_owner_secret = oauth_tokens.get('oauth_token_secret')
-
-
-if __name__ == '__main__':
-    tellstick_interface = TelldusInterface(public_key='FEHUVEW84RAFR5SP22RABURUPHAFRUNU',
-                                           private_key='ZUXEVEGA9USTAZEWRETHAQUBUR69U6EF',
-                                           token='0021b7dcce4e498e29080b14029485e705d74c6ff',
-                                           token_secret='6b2abf23dc637c611a47917ca176441b')

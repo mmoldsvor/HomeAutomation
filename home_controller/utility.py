@@ -68,9 +68,9 @@ class ConfigHandler:
                 return device_data, sensor_data
         except FileNotFoundError:
             with open(path, 'wb') as output_file:
-                pickle.dump([], output_file, protocol=pickle.HIGHEST_PROTOCOL)
-                pickle.dump([], output_file, protocol=pickle.HIGHEST_PROTOCOL)
-        return [], []
+                pickle.dump({}, output_file, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump({}, output_file, protocol=pickle.HIGHEST_PROTOCOL)
+        return {}, {}
 
     def save_data(self, device_data, sensor_data):
         path = os.path.join(self.config_dir, 'data.pickle')

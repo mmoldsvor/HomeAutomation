@@ -1,5 +1,7 @@
 from home_controller.devices import *
 from home_controller.sensors import *
+import home_controller.sensors as sensors_module
+import home_controller.devices as devices_module
 
 
 class Handler:
@@ -18,20 +20,9 @@ class Handler:
         :param identifier: The identifier in question
         :return: bool - True if unique, False otherwise
         """
-        if identifier in [item.identifier for item in self.data]:
+        if identifier in self.data.keys():
             return False
         return True
-
-    def get_by_identifier(self, identifier):
-        """
-        Gets the data by passing only the identifier
-        :param identifier: The identifier of the requested object
-        :return: Sensor or Device depending on subclass
-        """
-        identifiers = [item.identifier for item in self.data]
-        if identifier in identifiers:
-            return self.data[identifiers.index(identifier)]
-        return None
 
     def remove_by_identifier(self, identifier):
         """
@@ -39,54 +30,59 @@ class Handler:
         :param identifier: Unique identification of the item in which is being removed
         :return: Information about the removed device
         """
-        identifiers = [item.identifier for item in self.data]
-        if identifier in identifiers:
-            return self.data.pop(identifiers.index(identifier)).info_dict()
-        return None
-
-    def add_data(self, class_name, identifier, name, *args):
-        """
-        Appends a sensor to the Handler data list
-        :param class_name: str - The name of the Class or Subclass of which will be added
-        :param identifier: str - Unique identification
-        :param name: str -
-        :param args: The rest of the data added to the Sensor
-        :return: Information about the newly added data if successful, None otherwise
-        """
-        class_names = [cls.__name__ for cls in self.classes]
-
-        if class_name in class_names:
-            data_class = self.classes[class_names.index(class_name)]
-
-            self.data.append(data_class(identifier, name, *args))
-            return self.data[-1].info_dict()
+        if identifier in self.data.keys():
+            return self.data.pop(identifier).info_dict()
         return None
 
 
 class SensorHandler(Handler):
-    def __init__(self, data, sensor_requests, device_handler):
-        self.device_handler = device_handler
-        super().__init__(data, sensor_requests)
-
-        # All possible Class/Subclasses added to handler
-        self.classes = [cls for cls in Sensor.__subclasses__()] + [Sensor]
-
     def discover_sensors(self):
         devices = self.data_requests.request_data()
         for device_identifier in devices:
-            if self.get_by_identifier(device_identifier) is None:
-                self.data.append(Sensor(device_identifier, 'Unnamed', []))
+            if self.data.get(device_identifier) is None:
+                self.data[device_identifier] = Sensor('Unnamed', 'Sensor')
+
+    def add_sensor(self, identifier, device_type, name, connections=None):
+        if connections is None:
+            connections = []
+        try:
+            self.data[identifier] = getattr(sensors_module, device_type)(name, connections=connections)
+            return self.data[identifier].info_dict()
+        except AttributeError:
+            print('Sensor type is not a valid type')
+            return None
+
+    def change_sensor_type(self, identifier, sensor_type):
+        return self.add_sensor(identifier, sensor_type, self.data[identifier].name, self.data[identifier].connections)
+
+    def connect(self, identifier, devices):
+        sensor = self.data[identifier]
+        for device in devices:
+            if device not in sensor.connections:
+                sensor.connections.append(device)
 
 
 class DeviceHandler(Handler):
-    def __init__(self, data, device_requests):
-        super().__init__(data, device_requests)
-
-        # All possible Class/Subclasses added to handler
-        self.classes = [cls for cls in Device.__subclasses__()] + [Device]
+    def __init__(self, data, data_requests, device_interfaces):
+        super().__init__(data, data_requests)
+        self.device_interfaces = device_interfaces
 
     def discover_devices(self):
         devices = self.data_requests.request_data()
         for device_identifier in devices:
-            if self.get_by_identifier(device_identifier) is None:
-                self.data.append(Device(device_identifier, 'Unnamed'))
+            if self.data.get(device_identifier) is None:
+                self.data[device_identifier] = Device('Unnamed', 'Device')
+
+    def add_device(self, identifier, device_type, name):
+        try:
+            self.data[identifier] = getattr(devices_module, device_type)(name)
+            return self.data[identifier].info_dict()
+        except AttributeError:
+            print('Device type is not a valid type')
+            return None
+
+    def change_device_type(self, identifier, device_type):
+        return self.add_device(identifier, device_type, self.data[identifier].name)
+
+    def action(self, identifier):
+        self.data[identifier].action(identifier, self.device_interfaces)

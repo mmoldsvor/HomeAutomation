@@ -6,7 +6,6 @@ import json
 
 device_handler = None
 sensor_handler = None
-telldus_interface = None
 config_handler = None
 
 app = Flask(__name__)
@@ -26,9 +25,10 @@ def sensor_data():
         if event['eventType'] == 'touch':
             # Extract only the name of the sensor
             sensor_name = event['targetName'].split('/')[-1]
-            sensor = sensor_handler.get_by_identifier(sensor_name)
+            sensor = sensor_handler.data.get(sensor_name)
             if sensor is not None:
-                sensor.on_event(telldus_interface.request_action)
+                for identifier in sensor.connections:
+                    device_handler.action(identifier)
 
     return response(('result', 'success'))
 
@@ -39,8 +39,7 @@ def list_devices():
     Returns a list of all available devices on the network
     :return: 200 OK - List of all devices, on success
     """
-    return jsonify({'devices': {key: value for device in device_handler.data
-                                for (key, value) in device.info_dict().items()}})
+    return jsonify({'devices': {identifier: device.info_dict() for identifier, device in device_handler.data.items()}})
 
 
 @app.route('/device/<identifier>', methods=['GET', 'POST', 'DELETE'])
@@ -53,7 +52,7 @@ def get_device(identifier):
     """
 
     if request.method == 'GET':
-        device = device_handler.get_by_identifier(identifier)
+        device = device_handler.data.get(identifier)
         if device is not None:
             return jsonify(device.info_dict())
         else:
@@ -70,20 +69,20 @@ def get_device(identifier):
             return response(('result', 'Identifier has to be unique'), status_code=400)
 
         # Checks if required data is available
-        if 'class_name' not in data:
-            return response(('result', '"class_name" parameter is missing'), status_code=400)
+        if 'device_type' not in data:
+            return response(('result', '"device_type" parameter is missing'), status_code=400)
 
-        device_type = data['class_name']
+        device_type = data['device_type']
         name = device_type
         if 'name' in data:
             name = data['name']
 
-        device_info = device_handler.add_data(device_type, identifier, name)
+        device_info = device_handler.add_device(identifier, device_type, name)
         if device_info is not None:
             config_handler.save_data(device_handler.data, sensor_handler.data)
             return jsonify(device_info), 201
         else:
-            return response(('result', '"class_name" provided was not a valid Device class'), status_code=400)
+            return response(('result', '"device_type" provided was not a valid Device class'), status_code=400)
 
     elif request.method == 'DELETE':
         for sensor in sensor_handler.data:
@@ -102,14 +101,14 @@ def list_sensors():
     Returns a list of all available devices on the network
     :return: 200 OK - List of all devices, on success
     """
-    return jsonify({'sensors': {key: value for sensor in sensor_handler.data
-                                for (key, value) in sensor.info_dict().items()}})
+    sensor_handler.discover_sensors()
+    return jsonify({'sensors': {identifier: sensor.info_dict() for identifier, sensor in sensor_handler.data.items()}})
 
 
 @app.route('/sensor/<identifier>', methods=['GET', 'POST', 'DELETE'])
 def request_sensor(identifier):
     if request.method == 'GET':
-        sensor = sensor_handler.get_by_identifier(identifier)
+        sensor = sensor_handler.data.get(identifier)
         if sensor is not None:
             return jsonify(sensor.info_dict())
         else:
@@ -126,15 +125,15 @@ def request_sensor(identifier):
             return response(('result', 'Identifier has to be unique'), status_code=400)
 
         # Checks if required data is available
-        if 'class_name' not in data:
-            return response(('result', '"class_name" parameter is missing'), status_code=400)
+        if 'device_type' not in data:
+            return response(('result', '"device_type" parameter is missing'), status_code=400)
 
-        sensor_type = data['class_name']
+        sensor_type = data['device_type']
         name = sensor_type
         if 'name' in data:
             name = data['name']
 
-        sensor_info = sensor_handler.add_data(sensor_type, identifier, name, [])
+        sensor_info = sensor_handler.add_sensor(identifier, sensor_type, name)
         if sensor_info is not None:
             config_handler.save_data(device_handler.data, sensor_handler.data)
             return jsonify(sensor_info), 201
@@ -160,8 +159,8 @@ def pair_sensor(identifier):
     if 'device' not in data:
         return response(('result', 'Device identifier not specified'), status_code=400)
 
-    sensor = sensor_handler.get_by_identifier(identifier)
-    device = device_handler.get_by_identifier(data['device'])
+    sensor = sensor_handler.data.get(identifier)
+    device = device_handler.data.get(data['device'])
 
     if sensor is not None and device is not None:
         sensor.connections.append(device)
@@ -172,14 +171,8 @@ def pair_sensor(identifier):
 
 @app.route('/device/<identifier>/<function>', methods=['POST'])
 def device_request(identifier, function):
-    device = device_handler.get_by_identifier(identifier)
-
     if function == 'action':
-        # Checks if the device.toggle_state exists and is callable
-        if callable(getattr(device, "action", None)):
-            device.action(telldus_interface.request_action)
-        else:
-            abort(404)
+        device_handler.action(identifier)
 
     return response(('result', 'success'))
 
