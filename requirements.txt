@@ -1,3 +1,4 @@
+PyJWT
 Flask
 Flask-BasicAuth
 requests

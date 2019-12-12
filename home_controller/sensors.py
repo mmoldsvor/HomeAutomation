@@ -1,5 +1,5 @@
 class Sensor:
-    def __init__(self, identifier, name, connections):
+    def __init__(self, identifier, name, connections, sensor_type='Sensor'):
         """
         The parent Sensor class
         Does also work as a generic sensor
@@ -10,6 +10,7 @@ class Sensor:
         self.identifier = identifier
         self.name = name
         self.connections = connections
+        self.sensor_type = sensor_type
 
     def on_event(self, func):
         """
@@ -25,6 +26,7 @@ class Sensor:
         :return:
         """
         return {self.identifier: {'sensor_name': self.name,
+                                  'sensor_type': self.sensor_type,
                                   'devices': {key: value for device in self.connections
                                               for (key, value) in device.info_dict().items() if device is not None}}}
 

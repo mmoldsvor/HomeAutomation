@@ -12,13 +12,6 @@ config_handler = None
 app = Flask(__name__)
 
 
-app.config['BASIC_AUTH_USERNAME'] = 'username'  # config['basic_auth']['username']
-app.config['BASIC_AUTH_PASSWORD'] = 'password'  # ['basic_auth']['password']
-app.config['BASIC_AUTH_FORCE'] = True
-
-basic_auth = BasicAuth(app)
-
-
 @app.route('/DT/sensorData', methods=['POST'])
 def sensor_data():
     """
@@ -172,6 +165,7 @@ def pair_sensor(identifier):
 
     if sensor is not None and device is not None:
         sensor.connections.append(device)
+        config_handler.save_data(device_handler.data, sensor_handler.data)
         return sensor.info_dict()
     abort(404)
 

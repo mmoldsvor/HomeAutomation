@@ -4,10 +4,15 @@ import pickle
 
 
 class ConfigHandler:
-    def __init__(self, config_dir, required_parameters):
+    def __init__(self, required_parameters, config_dir):
         self.config = configparser.ConfigParser()
-        self.config_dir = config_dir
         self.required_parameters = required_parameters
+        self.config_dir = config_dir
+
+    def __str__(self):
+        return '\n'.join([f'{section.upper()} {option.upper()}: {self.config[section][option]}'
+                          for section in self.required_parameters.keys()
+                          for option in self.required_parameters[section]])
 
     def validate(self):
         self.create_config_dir()

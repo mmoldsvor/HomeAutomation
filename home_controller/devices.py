@@ -1,5 +1,5 @@
 class Device:
-    def __init__(self, identifier, name):
+    def __init__(self, identifier, name, device_type='Device'):
         """
         The parent class of all devices
         :param identifier: str: An unique identifier for the specific device
@@ -7,6 +7,7 @@ class Device:
         """
         self.identifier = identifier
         self.name = name
+        self.device_type = device_type
 
     def action(self, func):
         """
@@ -20,7 +21,17 @@ class Device:
         Creates a json-friendly representation of the device
         :return:
         """
-        return {self.identifier: {'device_name': self.name}}
+        return {self.identifier: {'device_name': self.name,
+                                  'device_type': self.device_type}}
+
+
+class HueBulbColor(Device):
+    def __init__(self, identifier, name, state=False):
+        super().__init__(identifier, name)
+        self.state = state
+
+    def action(self, func):
+        pass
 
 
 class TelldusSocket(Device):

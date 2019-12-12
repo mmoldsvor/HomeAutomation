@@ -1,10 +1,15 @@
-from home_controller.devices import Device
-from home_controller.sensors import Sensor
+from home_controller.devices import *
+from home_controller.sensors import *
 
 
 class Handler:
-    def __init__(self, data):
+    def __init__(self, data, data_requests):
+        """
+        :param data: Dictionary of every device
+        :param data_requests: Class for discovering new devices as they are added to external systems
+        """
         self.data = data
+        self.data_requests = data_requests
         self.classes = []
 
     def is_unique(self, identifier):
@@ -59,17 +64,29 @@ class Handler:
 
 
 class SensorHandler(Handler):
-    def __init__(self, data, device_handler):
+    def __init__(self, data, sensor_requests, device_handler):
         self.device_handler = device_handler
-        super().__init__(data)
+        super().__init__(data, sensor_requests)
 
         # All possible Class/Subclasses added to handler
         self.classes = [cls for cls in Sensor.__subclasses__()] + [Sensor]
 
+    def discover_sensors(self):
+        devices = self.data_requests.request_data()
+        for device_identifier in devices:
+            if self.get_by_identifier(device_identifier) is None:
+                self.data.append(Sensor(device_identifier, 'Unnamed', []))
+
 
 class DeviceHandler(Handler):
-    def __init__(self, data):
-        super().__init__(data)
+    def __init__(self, data, device_requests):
+        super().__init__(data, device_requests)
 
         # All possible Class/Subclasses added to handler
         self.classes = [cls for cls in Device.__subclasses__()] + [Device]
+
+    def discover_devices(self):
+        devices = self.data_requests.request_data()
+        for device_identifier in devices:
+            if self.get_by_identifier(device_identifier) is None:
+                self.data.append(Device(device_identifier, 'Unnamed'))
