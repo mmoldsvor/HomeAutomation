@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, abort
+from flask_cors import CORS, cross_origin
 import json
 
 
@@ -7,6 +8,7 @@ sensor_handler = None
 config_handler = None
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/DT/sensorData', methods=['POST'])
@@ -41,7 +43,7 @@ def list_devices():
     return jsonify({'devices': {identifier: device.info_dict() for identifier, device in device_handler.data.items()}})
 
 
-@app.route('/device/<identifier>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/device/<identifier>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH'])
 def handle_device(identifier):
     device = device_handler.data.get(identifier)
     data = validate_json(request.data)
@@ -67,8 +69,8 @@ def handle_device(identifier):
     elif request.method == 'PATCH' and device is not None:
         if 'name' in data:
             device.name = data['name']
-        if 'sensor_type' in data:
-            sensor_handler.change_sensor_type(identifier, data['sensor_type'])
+        if 'device_type' in data:
+            device_handler.change_device_type(identifier, data['device_type'])
         return result(device.info_dict(), 200)
     save_data()
     abort(404)

@@ -37,10 +37,10 @@ class Handler:
 
 class SensorHandler(Handler):
     def discover_sensors(self):
-        devices = self.data_requests.request_data()
-        for device_identifier in devices:
-            if self.data.get(device_identifier) is None:
-                self.data[device_identifier] = Sensor('Unnamed', 'Sensor')
+        sensors = self.data_requests.request_data()
+        for sensor_identifier in sensors:
+            if self.data.get(sensor_identifier) is None:
+                self.data[sensor_identifier] = Sensor('Unnamed', 'Sensor')
 
     def add_sensor(self, identifier, device_type, name, connections=None):
         if connections is None:
@@ -82,6 +82,7 @@ class DeviceHandler(Handler):
             return None
 
     def change_device_type(self, identifier, device_type):
+        print('test')
         return self.add_device(identifier, device_type, self.data[identifier].name)
 
     def action(self, identifier):

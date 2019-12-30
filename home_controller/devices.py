@@ -26,12 +26,8 @@ class Device:
 
 
 class HueBulbColor(Device):
-    def __init__(self, name, device_type='HueBulbColor', state=False):
-        super().__init__(name, device_type)
-        self.state = state
-
     def action(self, identifier, device_interfaces):
-        pass
+        device_interfaces['hue'].request_action(identifier)
 
 
 class TelldusSocket(Device):

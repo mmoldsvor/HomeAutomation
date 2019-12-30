@@ -1,5 +1,5 @@
-from home_controller import ConfigHandler, DeviceHandler, SensorHandler, DeviceRequest, DTSensorRequest
-from home_communication import TelldusInterface
+from home_controller import ConfigHandler, DeviceHandler, SensorHandler, DeviceRequest, DTSensorRequest, HueRequest
+from home_communication import TelldusInterface, HueInterface
 
 import sys
 
@@ -23,18 +23,21 @@ if __name__ == '__main__':
                                          private_key=config_handler.config['telldus']['private_key'],
                                          token=config_handler.config['telldus']['token'],
                                          token_secret=config_handler.config['telldus']['secret'])
+    hue_interface = HueInterface(ip_address=config_handler.config['hue']['ip_address'],
+                                 user_key=config_handler.config['hue']['user_key'])
     interfaces = {
         'telldus': telldus_interface,
-        'hue': None
+        'hue': hue_interface
     }
 
     dt_requests = DTSensorRequest(project_id=config_handler.config['dt']['project_id'],
                                   service_account_email=config_handler.config['dt']['service_account_email'],
                                   service_account_key_id=config_handler.config['dt']['key_id'],
                                   service_account_key_secret=config_handler.config['dt']['key_secret'])
+    hue_requests = HueRequest(ip_address=config_handler.config['hue']['ip_address'],
+                              user_key=config_handler.config['hue']['user_key'])
     sensor_request = DeviceRequest([dt_requests])
-
-    device_request = DeviceRequest([])
+    device_request = DeviceRequest([hue_requests])
 
     sensor_handler = SensorHandler(sensor_data, sensor_request)
     device_handler = DeviceHandler(device_data, device_request, interfaces)

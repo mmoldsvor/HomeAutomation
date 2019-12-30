@@ -15,6 +15,16 @@ class DeviceRequest:
         return [device for data_requester in self.data_requests for device in data_requester.request_devices()]
 
 
+class HueRequest:
+    def __init__(self, ip_address, user_key):
+        self.ip_address = ip_address
+        self.user_key = user_key
+
+    def request_devices(self):
+        project = requests.get(f'http://{self.ip_address}/api/{self.user_key}/lights').json()
+        return [device for device in project]
+
+
 class DTSensorRequest:
     def __init__(self, project_id, service_account_email, service_account_key_id, service_account_key_secret,
                  base_url='https://api.disruptive-technologies.com/v2'):
